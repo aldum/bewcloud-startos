@@ -57,7 +57,8 @@ export const main = sdk.setupMain(async ({
         subpath: null,
         mountpoint: '/data',
         readonly: false,
-      }).mountVolume({
+      })
+      .mountVolume({
         volumeId: 'config',
         subpath: '/bewcloud.config.ts',
         mountpoint: '/app/bewcloud.config.ts',
