@@ -1,45 +1,81 @@
+#PACKAGE_ID := $(shell awk -F"'" '/id:/ {print $$2}' startos/manifest.ts)
 PACKAGE_ID := $(shell sed -n -r -e "s/\s*id\s*:\s*['\"](.+)['\"],/\1/ p" startos/manifest.ts)
 INGREDIENTS := $(shell start-cli s9pk list-ingredients 2> /dev/null)
 
-.PHONY: all clean install check-deps check-init check-ts ingredients
+CMD_ARCH_GOAL := $(filter arm arm64 aarch64 x86 x64 x86_64, $(MAKECMDGOALS))
+ifeq ($(CMD_ARCH_GOAL),)
+  BUILD := universal
+  S9PK := $(PACKAGE_ID).s9pk
+else
+  BUILD := $(firstword $(CMD_ARCH_GOAL))
+  S9PK := $(PACKAGE_ID)_$(BUILD).s9pk
+endif
 
+.PHONY: all arm aarch64 x86 x86_64 clean install check-deps check-init package ingredients
 .DELETE_ON_ERROR:
 
-all: ${PACKAGE_ID}.s9pk
-	@echo " Done!"
-	@echo " Filesize:$(shell du -h $(PACKAGE_ID).s9pk) is ready"
+define SUMMARY
+	@manifest=$$(start-cli s9pk inspect $(1) manifest); \
+	size=$$(du -h $(1) | awk '{print $$1}'); \
+	title=$$(echo $$manifest | jq -r .title); \
+	version=$$(echo $$manifest | jq -r .version); \
+	arches=$$(echo $$manifest | jq -r '.hardwareRequirements.arch | join(", ")' 2>/dev/null \
+		 || echo -e '\033[1;33mupdate your manifest!\033[0m'); \
+	sdkv=$$(echo $$manifest | jq -r .sdkVersion); \
+	gitHash=$$(echo "$$manifest" | jq -r .gitHash | sed -E 's/(.*-modified)$$/\x1b[0;31m\1\x1b[0m/'); \
+	printf "\n"; \
+	printf "\033[1;32m✅ Build Complete!\033[0m\n"; \
+	printf "\n"; \
+	printf "\033[1;37m📦 $$title\033[0m   \033[36mv$$version\033[0m\n"; \
+	printf "───────────────────────────────\n"; \
+	printf " \033[1;36mFilename:\033[0m   %s\n" "$(1)"; \
+	printf " \033[1;36mSize:\033[0m       %s\n" "$$size"; \
+	printf " \033[1;36mArch:\033[0m       %s\n" "$$arches"; \
+	printf " \033[1;36mSDK:\033[0m        %s\n" "$$sdkv"; \
+	printf " \033[1;36mGit:\033[0m        %s\n" "$$gitHash"; \
+	echo ""
+endef
+
+all: $(PACKAGE_ID).s9pk
+	$(call SUMMARY,$(S9PK))
+
+$(BUILD): $(PACKAGE_ID)_$(BUILD).s9pk
+	$(call SUMMARY,$(S9PK))
+
+$(S9PK): $(INGREDIENTS) .git/HEAD .git/index
+	@$(MAKE) --no-print-directory ingredients
+	@echo "   Packing '$(S9PK)'..."
+	BUILD=$(BUILD) start-cli s9pk pack -o $(S9PK)
+
+ingredients: $(INGREDIENTS)
+	@echo "   Re-evaluating ingredients..."
+
+install: package | check-deps check-init
+	@HOST=$$(awk -F'/' '/^host:/ {print $$3}' ~/.startos/config.yaml); \
+	if [ -z "$$HOST" ]; then \
+		echo "Error: You must define \"host: http://server-name.local\" in ~/.startos/config.yaml"; \
+		exit 1; \
+	fi; \
+	echo "\n🚀 Installing to $$HOST ..."; \
+	start-cli package install -s $(S9PK)
 
 check-deps:
-	@if ! command -v start-cli > /dev/null; then \
-		echo "Error: start-cli not found. Please install it first."; \
-		exit 1; \
-	fi
-	@if ! command -v npm > /dev/null; then \
-		echo "Error: npm (Node Package Manager) not found. Please install Node.js and npm."; \
-		exit 1; \
-	fi
+	@command -v start-cli >/dev/null || \
+		(echo "Error: start-cli not found. Please see https://docs.start9.com/latest/developer-guide/sdk/installing-the-sdk" && exit 1)
+	@command -v npm >/dev/null || \
+		(echo "Error: npm not found. Please install Node.js and npm." && exit 1)
 
 check-init:
 	@if [ ! -f ~/.startos/developer.key.pem ]; then \
+		echo "Initializing StartOS developer environment..."; \
 		start-cli init; \
 	fi
 
 check-ts: node_modules
 	@npm run check
 
-ingredients: $(INGREDIENTS)
-	@echo "Re-evaluating ingredients..."
-
-${PACKAGE_ID}.s9pk: $(INGREDIENTS) | check-deps check-init
-	@$(MAKE) --no-print-directory ingredients
-	start-cli s9pk pack
-
-javascript/index.js: $(shell find startos -name "*.ts") tsconfig.json node_modules package.json check-ts
+javascript/index.js: $(shell find startos -type f) tsconfig.json node_modules
 	npm run build
-	$(eval INGREDIENTS := $(shell start-cli s9pk list-ingredients))
-
-assets:
-	mkdir -p assets
 
 node_modules: package-lock.json
 	npm ci
@@ -48,12 +84,5 @@ package-lock.json: package.json
 	npm i
 
 clean:
-	rm -rf ${PACKAGE_ID}.s9pk
-	rm -rf javascript
-	rm -rf node_modules
-
-install: | check-deps check-init
-	@if [ ! -f ~/.startos/config.yaml ]; then echo "You must define \"host: http://server-name.local\" in ~/.startos/config.yaml config file first."; exit 1; fi
-	@echo -e "\nInstalling to $$(grep -v '^#' ~/.startos/config.yaml | cut -d'/' -f3) ...\n"
-	@[ -f $(PACKAGE_ID).s9pk ] || ( $(MAKE) && echo -e "\nInstalling to $$(grep -v '^#' ~/.startos/config.yaml | cut -d'/' -f3) ...\n" )
-	@start-cli package install -s $(PACKAGE_ID).s9pk
+	@echo "Cleaning up build artifacts..."
+	@rm -rf $(PACKAGE_ID).s9pk $(PACKAGE_ID)_x86_64.s9pk $(PACKAGE_ID)_aarch64.s9pk javascript node_modules
