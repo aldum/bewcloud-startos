@@ -1,0 +1,3 @@
+[submodule "bewcloud"]
+	path = bewcloud
+	url = https://github.com/bewcloud/bewcloud.git
