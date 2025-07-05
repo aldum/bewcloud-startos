@@ -1,6 +1,7 @@
 import { configFile } from './fileModels/config'
+import { storeJson } from './fileModels/store.json'
 import { sdk } from './sdk'
-import { uiPort } from './utils'
+import { psqlDaemonUser, psqlUser, sqlPort, uiPort } from './utils'
 import { T } from '@start9labs/start-sdk'
 
 export const main = sdk.setupMain(async ({
@@ -12,13 +13,15 @@ export const main = sdk.setupMain(async ({
 }) => {
   console.info('### Starting Bewcloud! ###')
 
+  const store = await storeJson.read().once()
+  if (!store) {
+    throw new Error("Store is missing!")
+  }
+  const psqlPass = store.db_pass
+
   const dbEnv = {
-    POSTGRESQL_HOST: "localhost",
-    POSTGRESQL_USER: "postgres",
-    POSTGRES_PASSWORD: "postgres",
-    POSTGRESQL_PORT: `${5432}`,
-    POSTGRESQL_DBNAME: "bewcloud",
-    // POSTGRESQL_CAFILE: "",
+    POSTGRES_PASSWORD: psqlPass,
+    POSTGRES_USER: psqlUser,
   }
   const dbMounts = sdk.Mounts.of()
     .mountVolume({
@@ -26,10 +29,6 @@ export const main = sdk.setupMain(async ({
       subpath: 'db',
       mountpoint: '/var/lib/postgresql/data',
       readonly: false
-    })
-    .mountAssets({
-      subpath: "db",
-      mountpoint: "/docker-entrypoint-initdb.d/",
     })
   const db = await sdk.SubContainer.of(effects,
     { imageId: "db" },
@@ -41,12 +40,15 @@ export const main = sdk.setupMain(async ({
   })
 
   const mainEnv = {
-    ...dbEnv,
+    // these are not the same as the DB container's env
+    POSTGRESQL_HOST: "localhost",
+    POSTGRESQL_USER: psqlUser,
+    POSTGRESQL_DBNAME: psqlUser,
+    POSTGRESQL_PASSWORD: psqlPass,
+
     PORT: `${uiPort}`,
-    JWT_SECRET:
-      "d795e2ebf594755bb69f6fdcf493bb6dd672b88fedfa9799182c1c4519da97b0087dbe0559667239d36f39beb5fe76a15c6c440177656ac320c4d361b5d12763",
-    PASSWORD_SALT:
-      "3047512cc45d85a6ce65f9a0703785cfa36d789df49aa8f4a514f0d2fa3ac4fe"
+    JWT_SECRET: store.jwt_secret,
+    PASSWORD_SALT: store.salt,
   }
   const mainC = await sdk.SubContainer.of(
     effects,
@@ -83,42 +85,28 @@ export const main = sdk.setupMain(async ({
     .addDaemon('db', {
       subcontainer: db,
       exec: {
-        command: ["gosu", "postgres", "postgres"],
-        // command: ["docker-entrypoint.sh"],
-        // command: ["gosu", "postgres", "postgres",
-        //   "-c", "logging_collector=on"],
+        command: ["gosu", psqlDaemonUser, "postgres"],
         env: dbEnv,
       },
       ready: {
         display: null,
         fn: () =>
-          sdk.healthCheck.checkPortListening(effects, 5432, {
+          sdk.healthCheck.checkPortListening(effects, sqlPort, {
             successMessage: '',
             errorMessage: ''
           }),
       },
       requires: [],
     })
-    .addOneshot('create_db', {
-      exec: {
-        command: [
-          'psql', '-U', 'postgres',
-          '-f', '/docker-entrypoint-initdb.d/create_db.sql'
-        ],
-        env: dbEnv
-      },
-      subcontainer: db,
-      requires: ['db']
-    })
     .addOneshot('db-migrate', {
       exec: {
         command: ['deno', 'run',
           '--allow-net', '--allow-read', '--allow-env', '--allow-write',
           'migrate-db.ts'],
-        env: dbEnv
+        env: mainEnv
       },
       subcontainer: mainC,
-      requires: ['create_db']
+      requires: ['db']
     })
     .addDaemon('primary', {
       subcontainer: mainC,
