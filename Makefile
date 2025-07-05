@@ -12,6 +12,8 @@ else
   S9PK := $(PACKAGE_ID)_$(BUILD).s9pk
 endif
 
+ENV ?= dev
+
 .PHONY: all aarch64 x86_64 arm x86 clean install check-deps check-init package ingredients
 .DELETE_ON_ERROR:
 
@@ -48,7 +50,7 @@ arm: aarch64
 $(S9PK): $(INGREDIENTS) .git/HEAD .git/index
 	@$(MAKE) --no-print-directory ingredients
 	@echo "   Packing '$(S9PK)'..."
-	BUILD=$(BUILD) start-cli s9pk pack -o $(S9PK)
+	BUILD=$(BUILD) ENV=$(ENV) start-cli s9pk pack -o $(S9PK)
 
 ingredients: $(INGREDIENTS)
 	@echo "   Re-evaluating ingredients..."

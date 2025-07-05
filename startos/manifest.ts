@@ -6,6 +6,16 @@ const BUILD = process.env.BUILD || ''
 const architectures =
   BUILD === 'x86_64' || BUILD === 'aarch64' ? [BUILD] : ['x86_64', 'aarch64']
 
+const isProd = process.env.ENV === 'PROD'
+const bewImage = isProd ? {
+  dockerBuild: {
+    dockerfile: './Dockerfile',
+    workdir: 'bewcloud'
+  }
+} : {
+  dockerTag: 'ghcr.io/bewcloud/bewcloud:v2.4.7'
+}
+
 export const manifest = setupManifest({
   id: 'bewcloud',
   title: 'Bewcloud',
@@ -23,10 +33,8 @@ export const manifest = setupManifest({
   volumes: ['main', 'config'],
   images: {
     bewcloud: {
-      source: {
-        dockerTag: 'ghcr.io/bewcloud/bewcloud:v2.4.7',
-      },
       arch: architectures,
+      source: bewImage,
     } as SDKImageInputSpec,
     db: {
       source: {
