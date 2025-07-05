@@ -9,6 +9,7 @@ export const manifest = setupManifest({
   supportSite: 'https://docs.start9.com/',
   marketingSite: 'https://start9.com/',
   donationUrl: 'https://donate.start9.com/',
+  docsUrl: 'https://donate.start9.com/',
   description: {
     short: 'Bare bones example of a StartOS service',
     long: 'Bewcloud is a template service that provides examples of basic StartOS features.',
