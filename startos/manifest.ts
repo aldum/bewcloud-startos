@@ -24,7 +24,7 @@ export const manifest = setupManifest({
     },
     'postgres': {
       source: {
-        dockerTag: 'postgres:17',
+        dockerTag: 'postgres:17-alpine',
       },
     },
   },
