@@ -1,11 +1,29 @@
 import { matches, FileHelper } from '@start9labs/start-sdk'
 const { object, string } = matches
 
+const adminUser = object({
+  uuid: string,
+  email: string,
+  password_hash: string,
+})
+
 const shape = object({
   db_pass: string,
   jwt_secret: string,
   salt: string,
+  admin: adminUser.optional()
 })
+
+export type storeType = {
+  db_pass: string,
+  jwt_secret: string,
+  salt: string,
+  admin?: {
+    uuid: string,
+    email: string,
+    password_hash: string,
+  }
+}
 
 export const storeJson = FileHelper.json(
   {
