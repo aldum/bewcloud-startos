@@ -1,13 +1,13 @@
 import { matches, FileHelper } from '@start9labs/start-sdk'
 
 const { object, string, boolean, number,
-  arrayOf, oneOf, literal } = matches
+  arrayOf, literals } = matches
 
-const apps = oneOf(
-  literal('news'),
-  literal('notes'),
-  literal('photos'),
-  literal('expenses'),
+const apps = literals(
+  'news',
+  'notes',
+  'photos',
+  'expenses',
 )
 
 const shape = object({
