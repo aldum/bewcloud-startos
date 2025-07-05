@@ -1,0 +1,14 @@
+.do
+.github
+.git
+.gitignore
+docker-compose*
+Dockerfile
+render.yaml
+LICENSE
+README.md
+.env.sample
+node_modules
+_fresh
+data-files
+bewcloud.config.sample.ts
