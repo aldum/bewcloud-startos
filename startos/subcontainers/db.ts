@@ -1,6 +1,6 @@
 import { sdk } from '../sdk'
 import { Effects } from '@start9labs/start-sdk/base/lib/Effects'
-import { psqlUser } from '../utils'
+import { psqlUser } from '../utils/db'
 import { storeType } from '../fileModels/store.json'
 
 export const getEnv =
@@ -21,9 +21,9 @@ export const mounts = sdk.Mounts.of()
   })
 
 export const getSubcontainer =
-  async (effects: Effects) =>
+  async (effects: Effects, id: string = "db") =>
     await sdk.SubContainer.of(effects,
       { imageId: "db" },
       mounts,
-      "db"
+      id
     )

@@ -14,3 +14,16 @@ export const storeJson = FileHelper.json(
   },
   shape,
 )
+
+/**
+ * @description Read the store and throw an error if it's not present.
+ * Since it should get created upon installation automatically, this is generally not a possible problem.
+ * @returns storeJson
+ *   */
+export const unsafeReadStore = async () => {
+  const store = await storeJson.read().once()
+  if (!store) {
+    throw new Error("Store is missing!")
+  }
+  return store
+}

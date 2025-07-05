@@ -1,58 +1,29 @@
-import { configFile } from './fileModels/config'
-import { storeJson } from './fileModels/store.json'
 import { sdk } from './sdk'
+import { Effects } from
+  '@start9labs/start-sdk/base/lib/Effects'
+import { configFile } from './fileModels/config'
+import { unsafeReadStore } from './fileModels/store.json'
 import * as dbSub from './subcontainers/db'
-import { psqlDaemonUser, psqlUser, sqlPort, uiPort } from './utils'
-import { T } from '@start9labs/start-sdk'
+import * as mainSub from './subcontainers/bewcloud'
+import { psqlPort, uiPort, psqlDaemonUser } from './utils'
+import { exec } from 'child_process'
 
 export const main = sdk.setupMain(async ({
   effects,
   started
 }: {
-  effects: T.Effects,
+  effects: Effects,
   started: any
 }) => {
   console.info('### Starting Bewcloud! ###')
 
-  const store = await storeJson.read().once()
-  if (!store) {
-    throw new Error("Store is missing!")
-  }
-  const psqlPass = store.db_pass
+  const store = await unsafeReadStore()
 
   const dbEnv = await dbSub.getEnv(store)
   const db = await dbSub.getSubcontainer(effects)
 
-  const mainEnv = {
-    // these are not the same as the DB container's env
-    POSTGRESQL_HOST: "localhost",
-    POSTGRESQL_USER: psqlUser,
-    POSTGRESQL_DBNAME: psqlUser,
-    POSTGRESQL_PASSWORD: psqlPass,
-
-    PORT: `${uiPort}`,
-    JWT_SECRET: store.jwt_secret,
-    PASSWORD_SALT: store.salt,
-  }
-  const mainC = await sdk.SubContainer.of(
-    effects,
-    { imageId: 'bewcloud' },
-    sdk.Mounts.of()
-      .mountVolume({
-        volumeId: 'main',
-        subpath: null,
-        mountpoint: '/data',
-        readonly: false,
-      })
-      .mountVolume({
-        volumeId: 'config',
-        subpath: '/bewcloud.config.ts',
-        mountpoint: '/app/bewcloud.config.ts',
-        readonly: false,
-        type: 'file',
-      }),
-    'bewcloud-sub',
-  )
+  const mainEnv = await mainSub.getEnv(store)
+  const mainC = await mainSub.getSubcontainer(effects)
 
   configFile.write(effects, {
     auth: {
@@ -73,9 +44,9 @@ export const main = sdk.setupMain(async ({
         env: dbEnv,
       },
       ready: {
-        display: null,
+        display: 'Database',
         fn: () =>
-          sdk.healthCheck.checkPortListening(effects, sqlPort, {
+          sdk.healthCheck.checkPortListening(effects, psqlPort, {
             successMessage: '',
             errorMessage: ''
           }),
