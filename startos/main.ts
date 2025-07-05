@@ -1,6 +1,7 @@
 import { configFile } from './fileModels/config'
 import { storeJson } from './fileModels/store.json'
 import { sdk } from './sdk'
+import * as dbSub from './subcontainers/db'
 import { psqlDaemonUser, psqlUser, sqlPort, uiPort } from './utils'
 import { T } from '@start9labs/start-sdk'
 
@@ -19,25 +20,8 @@ export const main = sdk.setupMain(async ({
   }
   const psqlPass = store.db_pass
 
-  const dbEnv = {
-    POSTGRES_PASSWORD: psqlPass,
-    POSTGRES_USER: psqlUser,
-  }
-  const dbMounts = sdk.Mounts.of()
-    .mountVolume({
-      volumeId: 'main',
-      subpath: 'db',
-      mountpoint: '/var/lib/postgresql/data',
-      readonly: false
-    })
-  const db = await sdk.SubContainer.of(effects,
-    { imageId: "db" },
-    dbMounts,
-    "db"
-  )
-  await db.execFail(['docker-ensure-initdb.sh'], {
-    env: dbEnv,
-  })
+  const dbEnv = await dbSub.getEnv(store)
+  const db = await dbSub.getSubcontainer(effects)
 
   const mainEnv = {
     // these are not the same as the DB container's env
