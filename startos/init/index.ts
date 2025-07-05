@@ -9,10 +9,10 @@ import { createDb } from './db'
 export const init = sdk.setupInit(
   restoreInit,
   versionGraph,
+  actions,
   createDb,
   setInterfaces,
   setDependencies,
-  actions
 )
 
 export const uninit = sdk.setupUninit(versionGraph)

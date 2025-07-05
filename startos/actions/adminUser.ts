@@ -67,9 +67,11 @@ export const adminUser = sdk.Action.withInput(
   'admin-user-ops',
   // metadata
   async ({ effects }) => {
+    console.log("metadata read")
     const adminUser =
       await storeJson.read(s => s.admin)
         .const(effects)
+    console.log("metadata read done")
 
     const label = adminUser ?
       "Reset admin password" :

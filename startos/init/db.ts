@@ -5,8 +5,10 @@ import { sdk } from '../sdk'
 
 export const createDb =
   async (effects: Effects) => {
+    console.log('createDB read')
     const store = await unsafeReadStore()
 
+    console.log('createDB getEn')
     const dbEnv = await dbSub.getEnv(store)
 
     await sdk.SubContainer.withTemp(effects,
