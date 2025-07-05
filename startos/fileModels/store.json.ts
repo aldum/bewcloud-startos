@@ -45,3 +45,8 @@ export const unsafeReadStore = async () => {
   }
   return store
 }
+
+export const unsafeRead = async (accessor) => {
+  const store = unsafeReadStore()
+  return accessor(store)
+}
