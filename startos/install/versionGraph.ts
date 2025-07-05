@@ -13,10 +13,12 @@ export const versionGraph = VersionGraph.of({
       await generatePassword('a-f,0-9', 128)
     const salt =
       await generatePassword('a-f,0-9', 64)
+    console.log('preInst write')
     await storeJson.write(effects, {
       db_pass,
       jwt_secret,
       salt
     })
+    console.log('preInst write done')
   },
 })
