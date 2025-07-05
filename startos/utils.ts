@@ -11,6 +11,7 @@ export const generatePassword = async (
 )
 
 export const uiPort = 8080
+export const davPort = 5232
 export const sqlPort = 5432
 export const psqlDaemonUser = "postgres"
 export const psqlUser = "postgres"

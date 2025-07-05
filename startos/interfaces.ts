@@ -1,8 +1,24 @@
 import { sdk } from './sdk'
-import { uiPort } from './utils'
+import { davPort, uiPort } from './utils'
 
 export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
-  const uiMulti = sdk.MultiHost.of(effects, 'ui-multi')
+  const davMulti = sdk.MultiHost.of(effects, 'dav-multi')
+  const davMultiOrigin = await davMulti.bindPort(
+    davPort, { protocol: 'http' }
+  )
+  const dav = sdk.createInterface(effects, {
+    name: 'WebDAV',
+    id: 'dav',
+    description: 'CalDAV/CardDAV api',
+    type: 'api',
+    masked: false,
+    schemeOverride: null,
+    username: null,
+    path: '',
+    query: {},
+  })
+
+  const uiMulti = sdk.MultiHost.of(effects, 'dac-multi')
   const uiMultiOrigin = await uiMulti.bindPort(uiPort, {
     protocol: 'http',
   })
@@ -18,7 +34,8 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
     query: {},
   })
 
+  const davReceipt = await davMultiOrigin.export([dav])
   const uiReceipt = await uiMultiOrigin.export([ui])
 
-  return [uiReceipt]
+  return [davReceipt, uiReceipt]
 })
