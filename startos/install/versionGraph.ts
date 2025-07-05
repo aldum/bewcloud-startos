@@ -7,8 +7,8 @@ export const versionGraph = VersionGraph.of({
   current,
   other,
   preInstall: async (effects: T.Effects) => {
-    const db_pass = "password"
-    // await generatePassword('A-Z,1-9', 25)
+    const db_pass =
+      await generatePassword('A-Z,1-9', 25)
     const jwt_secret =
       await generatePassword('a-f,0-9', 128)
     const salt =
