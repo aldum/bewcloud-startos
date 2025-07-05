@@ -70,6 +70,7 @@ export const adminUser = sdk.Action.withInput(
     console.log("metadata read")
     const adminUser =
       await storeJson.read(s => s.admin)
+        // .once()
         .const(effects)
     console.log("metadata read done")
 
