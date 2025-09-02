@@ -3,21 +3,13 @@ import { SDKImageInputSpec } from '@start9labs/start-sdk/base/lib/types/Manifest
 
 const BUILD = process.env.BUILD || ''
 
-const architectures = (() => {
-  if (BUILD === 'x86_64' || BUILD === 'x86' || BUILD === 'x64') {
-    return ['x86_64']
-  } else if (BUILD === 'aarch64' || BUILD === 'arm' || BUILD === 'arm64') {
-    return ['aarch64']
-  } else {
-    return ['x86_64', 'aarch64']
-  }
-})()
-
+const architectures =
+  BUILD === 'x86_64' || BUILD === 'aarch64' ? [BUILD] : ['x86_64', 'aarch64']
 
 export const manifest = setupManifest({
   id: 'bewcloud',
   title: 'Bewcloud',
-  license: 'mit',
+  license: 'MIT',
   wrapperRepo: 'https://github.com/aldum/bewcloud-startos',
   upstreamRepo: 'https://github.com/bewcloud/bewcloud',
   supportSite: 'https://github.com/bewcloud/bewcloud/issues',
@@ -30,21 +22,22 @@ export const manifest = setupManifest({
   },
   volumes: ['main', 'config'],
   images: {
-    'bewcloud': {
+    bewcloud: {
       source: {
         dockerTag: 'ghcr.io/bewcloud/bewcloud:v2.4.7',
       },
-      arch: architectures,
+      arch: ['x86_64'], // no upstream aarch64 support for now
     } as SDKImageInputSpec,
-    'db': {
+    db: {
       source: {
         dockerTag: 'postgres:17-alpine',
       },
-      arch: architectures,
+      arch: ['x86_64'], // no upstream aarch64 support for now
     } as SDKImageInputSpec,
   },
+  // hardwareRequirements: { arch: architectures },
   hardwareRequirements: {
-    arch: architectures,
+    arch: ['x86_64'],
   },
   alerts: {
     install: null,
