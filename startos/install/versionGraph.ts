@@ -17,8 +17,8 @@ export const versionGraph = VersionGraph.of({
     await storeJson.write(effects, {
       db_pass,
       jwt_secret,
-      salt
+      salt,
     })
     console.log('preInst write done')
-  },
+  }
 })
