@@ -13,7 +13,7 @@ const bewImage = isProd ? {
     workdir: 'bewcloud'
   }
 } : {
-  dockerTag: 'ghcr.io/bewcloud/bewcloud:v2.4.7'
+  dockerTag: 'ghcr.io/bewcloud/bewcloud:v2.5.0@sha256:aa771cdd1ab747febcb95698bb4add1150843c5eecb1e451b57b69271fa6635f'
 }
 
 export const manifest = setupManifest({
