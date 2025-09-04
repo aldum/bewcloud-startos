@@ -6,6 +6,7 @@ import { unsafeReadStore } from './fileModels/store.json'
 import * as dbSub from './subcontainers/db'
 import * as mainSub from './subcontainers/bewcloud'
 import { psqlPort, uiPort, psqlDaemonUser } from './utils'
+import { exec } from 'node:child_process'
 
 export const main = sdk.setupMain(async ({
   effects,
@@ -23,6 +24,7 @@ export const main = sdk.setupMain(async ({
 
   const mainEnv = await mainSub.getEnv(store)
   const mainC = await mainSub.getSubcontainer(effects)
+  exec('chown -R 1993:1993 /media/startos/volumes/main/bewcloud')
 
   configFile.write(effects, {
     auth: {

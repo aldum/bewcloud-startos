@@ -3,6 +3,8 @@ import { Effects } from '@start9labs/start-sdk/base/lib/Effects'
 import { psqlUser, psqlHost, uiPort } from '../utils'
 import { storeType } from '../fileModels/store.json'
 
+export const filesPath = '/app/data-files'
+
 export const getEnv =
   async (store: storeType) => {
     const psqlPass = store.db_pass
@@ -22,8 +24,8 @@ export const getEnv =
 export const mounts = sdk.Mounts.of()
   .mountVolume({
     volumeId: 'main',
-    subpath: null,
-    mountpoint: '/data',
+    subpath: 'bewcloud',
+    mountpoint: filesPath,
     readonly: false,
   })
   .mountVolume({
