@@ -93,9 +93,9 @@ export const main = sdk.setupMain(async ({
         command: ["/venv/bin/radicale", "--config", radSub.davConfigPath],
       },
       ready: {
-        display: 'Database',
+        display: null,
         fn: () =>
-          sdk.healthCheck.checkPortListening(effects, psqlPort, {
+          sdk.healthCheck.checkPortListening(effects, davPort, {
             successMessage: '',
             errorMessage: ''
           }),
