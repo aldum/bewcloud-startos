@@ -1,6 +1,8 @@
 import { sdk } from '../sdk'
-import { storeJson, unsafeReadStore } from '../fileModels/store.json'
-import { defaultRandomString, generatePassword, hashPassword } from '../utils/password'
+import { storeJson, unsafeReadStore }
+  from '../fileModels/store.json'
+import { defaultRandomString, generatePassword, hashPassword }
+  from '../utils/password'
 import { uiPort, DB } from '../utils'
 
 const { InputSpec, Value } = sdk
@@ -57,13 +59,7 @@ export const adminUser = sdk.Action.withInput(
   'admin-user-ops',
   // metadata
   async ({ effects }) => {
-    console.log("metadata read")
-    const store = await storeJson.read().const(effects)
-    const adminUser = store?.admin
-    // await storeJson.read(s => s.admin)
-    //   // .once()
-    //   .const(effects)
-    console.log("metadata read done")
+    const adminUser = await storeJson.read(s => s.admin).const(effects)
 
     const label = adminUser ?
       "Reset admin password" :
