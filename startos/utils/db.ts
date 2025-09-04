@@ -1,8 +1,10 @@
 import postgres from 'postgres'
 import { unsafeReadStore } from '../fileModels/store.json'
 
+export const localDomain = "bewcloud.startos"
+
 export const psqlDaemonUser = "postgres"
-export const psqlHost = "localhost"
+export const psqlHost = `db.${localDomain}`
 export const psqlUser = "postgres"
 export const psqlPort = 5432
 
