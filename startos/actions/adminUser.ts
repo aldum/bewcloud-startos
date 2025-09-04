@@ -50,17 +50,7 @@ export const inputSpec = InputSpec.of({
       patterns: [],
     }
   }),
-  // switch when alpha.10 is out
-  // new: Value.hidden<boolean>(),
-  new: Value.dynamicToggle(
-    async () => {
-      return {
-        name: "",
-        default: true,
-        disabled: 'a',
-      }
-    }
-  ),
+  new: Value.hidden<boolean>(),
 })
 
 export const adminUser = sdk.Action.withInput(
