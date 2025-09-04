@@ -1,5 +1,5 @@
 import postgres from 'postgres'
-import { storeJson } from '../fileModels/store.json'
+import { storeJson, unsafeReadStore } from '../fileModels/store.json'
 
 export const psqlDaemonUser = "postgres"
 export const psqlHost = "localhost"
@@ -12,7 +12,12 @@ export class DB {
     port: psqlPort,
     user: psqlUser,
     db: psqlUser,
-    pass: ""
+    password: async () => {
+      const store = await unsafeReadStore()
+      const pw: string = store?.db_pass
+      return pw
+      // return "password"
+    },
   })
 
   private static usersTable = this.sql`bewcloud_users`

@@ -8,6 +8,7 @@ import { createDb } from './db'
 
 export const init = sdk.setupInit(
   restoreInit,
+  actions,
   versionGraph,
   actions,
   createDb,
