@@ -100,7 +100,7 @@ export const main = sdk.setupMain(async ({
             errorMessage: ''
           }),
       },
-      requires: [],
+      requires: ['db'],
     })
     .addDaemon('primary', {
       subcontainer: mainC,
