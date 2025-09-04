@@ -25,7 +25,7 @@ export const manifest = setupManifest({
   supportSite: 'https://github.com/bewcloud/bewcloud/issues',
   marketingSite: 'https://bewcloud.com/',
   donationUrl: 'https://github.com/sponsors/bewcloud',
-  docsUrl: 'https://donate.start9.com/',
+  docsUrl: 'https://github.com/aldum/bewcloud-startos/instructions.md',
   description: {
     short: 'Bewcloud',
     long: 'Bewcloud is service',
