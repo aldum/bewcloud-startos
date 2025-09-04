@@ -58,7 +58,6 @@ import { Config, PartialDeep } from './lib/types.ts'
 const config: PartialDeep<Config> =
 `
 const footer = 'export default config'
-const w = JsonHelper.write
 
 export const configFile = FileHelper.raw(
   JsonHelper.path,

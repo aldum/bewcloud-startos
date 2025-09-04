@@ -6,7 +6,6 @@ import { unsafeReadStore } from './fileModels/store.json'
 import * as dbSub from './subcontainers/db'
 import * as mainSub from './subcontainers/bewcloud'
 import { psqlPort, uiPort, psqlDaemonUser } from './utils'
-import { exec } from 'child_process'
 
 export const main = sdk.setupMain(async ({
   effects,

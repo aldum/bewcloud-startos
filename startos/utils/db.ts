@@ -1,5 +1,5 @@
 import postgres from 'postgres'
-import { storeJson, unsafeReadStore } from '../fileModels/store.json'
+import { unsafeReadStore } from '../fileModels/store.json'
 
 export const psqlDaemonUser = "postgres"
 export const psqlHost = "localhost"
@@ -16,7 +16,6 @@ export class DB {
       const store = await unsafeReadStore()
       const pw: string = store?.db_pass
       return pw
-      // return "password"
     },
   })
 
