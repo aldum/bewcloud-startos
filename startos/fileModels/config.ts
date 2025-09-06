@@ -41,6 +41,12 @@ const shape = object({
     host: string,
     port: number,
   }).optional(),
+  contacts: object({
+    cardDavUrl: string,
+  }),
+  calendar: object({
+    calDavUrl: string,
+  }),
 })
 
 const JsonHelper = FileHelper.json(

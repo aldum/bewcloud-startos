@@ -42,6 +42,12 @@ export const manifest = setupManifest({
       },
       arch: architectures,
     } as SDKImageInputSpec,
+    dav: {
+      source: {
+        dockerTag: 'tomsquest/docker-radicale:3.5.5.0',
+      },
+      arch: architectures,
+    } as SDKImageInputSpec,
   },
   hardwareRequirements: { arch: architectures },
   alerts: {

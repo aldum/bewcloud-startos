@@ -1,11 +1,13 @@
 import { sdk } from './sdk'
 import { Effects } from
   '@start9labs/start-sdk/base/lib/Effects'
-import { configFile } from './fileModels/config'
+import { configFile as bewConfigFile } from './fileModels/config'
+import { configFile as davConfigFile } from './fileModels/config-dav'
 import { unsafeReadStore } from './fileModels/store.json'
 import * as dbSub from './subcontainers/db'
 import * as mainSub from './subcontainers/bewcloud'
-import { psqlPort, uiPort, psqlDaemonUser } from './utils'
+import * as radSub from './subcontainers/radicale'
+import { psqlPort, uiPort, psqlDaemonUser, davPort } from './utils'
 import { exec } from 'node:child_process'
 
 export const main = sdk.setupMain(async ({
@@ -22,11 +24,15 @@ export const main = sdk.setupMain(async ({
   const dbEnv = await dbSub.getEnv(store)
   const db = await dbSub.getSubcontainer(effects)
 
+  const dav = await radSub.getSubcontainer(effects)
+  const radUrl = `localhost:${davPort}`
+  const fullRadUrl = `http://${radUrl}`
+
   const mainEnv = await mainSub.getEnv(store)
   const mainC = await mainSub.getSubcontainer(effects)
   exec('chown -R 1993:1993 /media/startos/volumes/main/bewcloud')
 
-  configFile.write(effects, {
+  bewConfigFile.write(effects, {
     auth: {
       baseUrl: 'http://localhost:8000',
       allowSignups: false,
@@ -34,6 +40,23 @@ export const main = sdk.setupMain(async ({
       enableForeverSignup: true,
       enableMultiFactor: false,
       skipCookieDomainSecurity: true,
+    },
+    contacts: {
+      cardDavUrl: fullRadUrl,
+    },
+    calendar: {
+      calDavUrl: fullRadUrl,
+    }
+  })
+  davConfigFile.write(effects, {
+    server: {
+      hosts: radUrl,
+    },
+    auth: {
+      type: 'http_x_remote_user',
+    },
+    storage: {
+      filesystem_folder: radSub.collectionsPath,
     }
   })
 
@@ -63,6 +86,21 @@ export const main = sdk.setupMain(async ({
       },
       subcontainer: mainC,
       requires: ['db']
+    })
+    .addDaemon('radicale', {
+      subcontainer: dav,
+      exec: {
+        command: ["/venv/bin/radicale", "--config", radSub.davConfigPath],
+      },
+      ready: {
+        display: 'Database',
+        fn: () =>
+          sdk.healthCheck.checkPortListening(effects, psqlPort, {
+            successMessage: '',
+            errorMessage: ''
+          }),
+      },
+      requires: [],
     })
     .addDaemon('primary', {
       subcontainer: mainC,
