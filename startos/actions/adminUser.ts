@@ -68,10 +68,11 @@ export const adminUser = sdk.Action.withInput(
   // metadata
   async ({ effects }) => {
     console.log("metadata read")
-    const adminUser =
-      await storeJson.read(s => s.admin)
-        // .once()
-        .const(effects)
+    const store = await storeJson.read().const(effects)
+    const adminUser = store?.admin
+    // await storeJson.read(s => s.admin)
+    //   // .once()
+    //   .const(effects)
     console.log("metadata read done")
 
     const label = adminUser ?
