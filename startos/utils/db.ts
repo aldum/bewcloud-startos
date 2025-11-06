@@ -6,6 +6,7 @@ export const localDomain = "bewcloud.startos"
 export const psqlDaemonUser = "postgres"
 export const psqlHost = `db.${localDomain}`
 export const psqlUser = "postgres"
+export const psqlDb = "postgres"
 export const psqlPort = 5432
 
 export class DB {
@@ -13,7 +14,7 @@ export class DB {
     host: psqlHost,
     port: psqlPort,
     user: psqlUser,
-    db: psqlUser,
+    db: psqlDb,
     password: async () => {
       const store = await unsafeReadStore()
       const pw: string = store?.db_pass
