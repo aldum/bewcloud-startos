@@ -21,9 +21,9 @@ export const mounts = sdk.Mounts.of()
   })
 
 export const getSubcontainer =
-  async (effects: Effects, id: string = "db") =>
+  async (effects: Effects, name: string = "db") =>
     await sdk.SubContainer.of(effects,
       { imageId: "db" },
       mounts,
-      id
+      name
     )
