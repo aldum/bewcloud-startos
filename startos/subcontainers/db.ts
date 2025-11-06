@@ -19,6 +19,12 @@ export const mounts = sdk.Mounts.of()
     mountpoint: '/var/lib/postgresql/data',
     readonly: false
   })
+  .mountVolume({
+    volumeId: 'run',
+    subpath: 'db',
+    mountpoint: '/var/run',
+    readonly: false
+  })
 
 export const getSubcontainer =
   async (effects: Effects, name: string = "db") =>

@@ -30,7 +30,7 @@ export const manifest = setupManifest({
     short: 'Bewcloud',
     long: 'Bewcloud is a lightweight cloud service',
   },
-  volumes: ['main', 'config'],
+  volumes: ['main', 'config', 'run'],
   images: {
     bewcloud: {
       arch: architectures,
