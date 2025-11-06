@@ -2,7 +2,7 @@ import { sdk } from '../sdk'
 import { storeJson, unsafeReadStore }
   from '../fileModels/store.json'
 import { defaultRandomString, generatePassword, hashPassword }
-  from '../utils/password'
+  from '../utils'
 import { uiPort, DB } from '../utils'
 
 const { InputSpec, Value } = sdk
