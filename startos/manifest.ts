@@ -28,7 +28,7 @@ export const manifest = setupManifest({
   docsUrl: 'https://github.com/aldum/bewcloud-startos/instructions.md',
   description: {
     short: 'Bewcloud',
-    long: 'Bewcloud is service',
+    long: 'Bewcloud is a lightweight cloud service',
   },
   volumes: ['main', 'config'],
   images: {
